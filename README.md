@@ -2,7 +2,7 @@
 
 ### What is this
 
-To circumvent learning how to manage REBOL or PERL to output an image to a webpage this program simply uses PHP to send the running application data through sockets, waits until the image with the right ID is rendered, and then displays the image. Basically localhost sockets.
+To circumvent learning how to manage REBOL or PERL to output an image to a webpage this program simply uses PHP to send the running application arguments through sockets. Then it waits until the image with the right ID is rendered, and then displays the image. Basically localhost sockets.
 
 ### What is here
 
