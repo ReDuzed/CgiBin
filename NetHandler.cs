@@ -160,7 +160,7 @@ Console.WriteLine($"Starting to send file over network {info.client.Client.Remot
                     case "--meter":
                         meter = Meter.BEP;
                         break;
-                    case "--weekly":
+                    case "--week":
                         type = StatType.Weekly;
                         break;
                 }
@@ -182,6 +182,8 @@ Console.WriteLine($"Starting to send file over network {info.client.Client.Remot
                 switch (args[i])
                 {
                     case "--week":
+                        if (args.Contains("--player"))
+                            break;
                         file = Raster.RasterizeToFile(600, stats.GetStatsWeekly(list), "Weekly stats", StatType.Weekly, rand);
                         stats.Dispose();
                         break;
