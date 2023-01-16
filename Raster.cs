@@ -69,7 +69,7 @@ namespace CgiBin
                     if (renderBackground)
                     {
                         if (!File.Exists(backgroundTex))
-                        { 
+                        {
                             var draw = DrawHelper.ErrorResult(width, _height, 24);
                             graphics.DrawImage(draw, Point.Empty);
                         }
