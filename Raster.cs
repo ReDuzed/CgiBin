@@ -10,7 +10,15 @@ namespace CgiBin
 {
     public class Raster
     {
-        public static string file = "./Resources/_stats.png";
+        public static string Path()
+        { 
+            if (file.Contains("/"))
+                return file.Substring(0, file.LastIndexOf("/"));
+            else if (file.Contains("\\")) 
+                return file.Substring(0, file.LastIndexOf("\\"));
+            else return "./";
+        }
+        public static string file = "./Resources/_result";
         public static string texture = "./Resources/texture.png";
         public static bool renderBackground = false;
         static readonly float ratio = 16f / 9f;
@@ -20,7 +28,7 @@ namespace CgiBin
         static int lines(string text) => text.Count(t => t == '\n');
         static double fontSize = 12d;
         private Raster() { }
-        public static string RasterizeToFile(int width, List<Entry> list, string header, StatType type)
+        public static string RasterizeToFile(int width, List<Entry> list, string header, StatType type, string rand = "1000")
         {
             var green = Color.FromArgb(0, 255, 0);
             float fontSize = 18f;
@@ -38,11 +46,22 @@ namespace CgiBin
                     break;
             }
             int _height = height(count);
+            int size = 32;
+            int offY = 4;
+            int top = 40;
+            int headerTop = top / 5;
+            float marginIcon = 0.02f;
+            float marginText = 0.1f;
+            float marginTextNum = 0.8f;
+            float marginBrush = 0.96f;
+            SolidBrush border = new SolidBrush(Color.DarkSlateGray);
+
             using (Bitmap bitmap = new Bitmap(width, _height))
             {
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     graphics.FillRectangle(new SolidBrush(green), new Rectangle(0, 0, width, _height));
+                    graphics.FillRectangle(Brushes.DimGray, new RectangleF((int)(width * marginIcon), headerTop, width * marginBrush, size - offY));
                     if (renderBackground)
                     {
                         var draw = DrawHelper.ErrorResult(width, _height, 24);
@@ -59,7 +78,6 @@ namespace CgiBin
                                 output = list[i].data.weekly;
                                 break;
                         }
-                        int size = 32;
                         var image_brush = DrawHelper.ErrorResult((int)(width * 0.6f), 16, 8);
                         var image_icon = DrawHelper.ErrorResult(size, size, 8);
                         TextureBrush texture_brush = new TextureBrush(Bitmap.FromFile(texture));
@@ -76,15 +94,6 @@ namespace CgiBin
                                 brush = new SolidBrush(Color.Purple);
                                 goto default;
                             default:
-                                int offY = 4;
-                                int top = 40;
-                                int headerTop = top / 5;
-                                float marginIcon = 0.02f;
-                                float marginText = 0.1f;
-                                float marginTextNum = 0.8f;
-                                float marginBrush = 0.96f;
-                                SolidBrush border = new SolidBrush(Color.DarkSlateGray);
-
                                 brush = new SolidBrush(Color.LightGray);
                                 var icon = DrawHelper.TextureMask(image_icon, DrawHelper.Mask_Circle(image_icon.Width, green), green);
                                 
@@ -114,7 +123,7 @@ namespace CgiBin
                     }
                 }
                 bitmap.MakeTransparent(green);
-                bitmap.Save(file, ImageFormat.Png);
+                bitmap.Save($"{file}_{rand}.png", ImageFormat.Png);
             }
             return file;
         }
