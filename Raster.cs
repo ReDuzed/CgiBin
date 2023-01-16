@@ -27,6 +27,7 @@ namespace CgiBin
             Raster.fontSize = fontSize + fontSize / 40d;// / 0.63265335d;
             int count = 0;
             int offset = 0;
+            int output = 0;
             switch (type)
             {
                 case StatType.Monthly:
@@ -49,6 +50,15 @@ namespace CgiBin
                     }
                     for (int i = 0; i < count; i++)
                     {
+                        switch (type)
+                        {
+                            case StatType.Monthly:
+                                output = list[i].data.total;
+                                break;
+                            case StatType.Weekly:
+                                output = list[i].data.weekly;
+                                break;
+                        }
                         int size = 32;
                         var image_brush = DrawHelper.ErrorResult((int)(width * 0.6f), 16, 8);
                         var image_icon = DrawHelper.ErrorResult(size, size, 8);
@@ -93,12 +103,12 @@ namespace CgiBin
                                     {
                                         graphics.DrawString(header, new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold | FontStyle.Underline), border, new PointF(width * marginIcon + m, headerTop));
                                         graphics.DrawString($"{list[i].index + offset}. {list[i].data.username}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), border, new PointF(width * marginText + m, i * (size + offY) + n + top));
-                                        graphics.DrawString($"{list[i].data.total}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), border, new PointF(width * marginTextNum + m, i * (size + offY) + n + top));
+                                        graphics.DrawString($"{output}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), border, new PointF(width * marginTextNum + m, i * (size + offY) + n + top));
                                     }
                                 }
                                 graphics.DrawString(header, new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold | FontStyle.Underline), brush, new PointF(width * marginIcon, headerTop));
                                 graphics.DrawString($"{list[i].index + offset}. {list[i].data.username}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), brush, new PointF(width * marginText, i * (size + offY) + top));
-                                graphics.DrawString($"{list[i].data.total}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), brush, new PointF(width * marginTextNum, i * (size + offY) + top));
+                                graphics.DrawString($"{output}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), brush, new PointF(width * marginTextNum, i * (size + offY) + top));
                                 break;
                         }
                     }

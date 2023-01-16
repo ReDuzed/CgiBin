@@ -2,7 +2,7 @@
   "profiles": {
     "CgiBin": {
       "commandName": "Project",
-      "commandLineArgs": "--apiurl http://www.tserver.online:8080/api/char_stats_cep/0 --player Equinaux",
+      "commandLineArgs": "--apiurl http://www.tserver.online:8080/api/char_stats_cep/0 --runserver 9876",
       "nativeDebugging": true
     }
   }

@@ -276,6 +276,7 @@ namespace CgiBin
     public enum StatType
     {
         Weekly,
-        Monthly
+        Monthly,
+        Total
     }
 }
