@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,10 @@ namespace CgiBin
         }
         public static string file = "./Resources/_result";
         public static string texture = "./Resources/texture.png";
+        public static string backgroundTex = "./Resources/background.png";
+        private static string tr_icon = "./Resources/tr_icon.png";
+        private static string nc_icon = "./Resources/nc_icon.png";
+        private static string vs_icon = "./Resources/vs_icon.png";
         public static bool renderBackground = false;
         static readonly float ratio = 16f / 9f;
         static int width = 240;
@@ -61,12 +66,19 @@ namespace CgiBin
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     graphics.FillRectangle(new SolidBrush(green), new Rectangle(0, 0, width, _height));
-                    graphics.FillRectangle(Brushes.DimGray, new RectangleF((int)(width * marginIcon), headerTop, width * marginBrush, size - offY));
                     if (renderBackground)
                     {
-                        var draw = DrawHelper.ErrorResult(width, _height, 24);
-                        graphics.DrawImage(draw, Point.Empty);
+                        if (!File.Exists(backgroundTex))
+                        { 
+                            var draw = DrawHelper.ErrorResult(width, _height, 24);
+                            graphics.DrawImage(draw, Point.Empty);
+                        }
+                        else
+                        {
+                            graphics.DrawImage(Bitmap.FromFile(backgroundTex), new Rectangle(0, 0, width, _height));
+                        }
                     }
+                    graphics.FillRectangle(Brushes.DimGray, new RectangleF((int)(width * marginIcon), headerTop, width * marginBrush, size - offY));
                     for (int i = 0; i < count; i++)
                     {
                         switch (type)
@@ -78,29 +90,39 @@ namespace CgiBin
                                 output = list[i].data.weekly;
                                 break;
                         }
-                        var image_brush = DrawHelper.ErrorResult((int)(width * 0.6f), 16, 8);
+                        var image_brush = DrawHelper.ErrorResult((int)(width * 0.6f), 16, 12);
                         var image_icon = DrawHelper.ErrorResult(size, size, 8);
-                        TextureBrush texture_brush = new TextureBrush(Bitmap.FromFile(texture));
+                        TextureBrush texture_brush;
+                        if (File.Exists(texture))
+                            texture_brush = new TextureBrush(Bitmap.FromFile(texture));
+                        else texture_brush = new TextureBrush(image_brush);
                         SolidBrush brush = null;
+                        var icon = DrawHelper.TextureMask(image_icon, DrawHelper.Mask_Circle(image_icon.Width, green), green);
+                        Bitmap icon_image = null;
                         switch (list[i].faction)
                         {
                             case Faction.TR:
                                 brush = new SolidBrush(Color.Red);
+                                if (File.Exists(tr_icon))
+                                    icon_image = (Bitmap)Image.FromFile(tr_icon);
                                 goto default;
                             case Faction.NC:
                                 brush = new SolidBrush(Color.Blue);
+                                if (File.Exists(nc_icon))
+                                    icon_image = (Bitmap)Image.FromFile(nc_icon);
                                 goto default;
                             case Faction.VS:
                                 brush = new SolidBrush(Color.Purple);
+                                if (File.Exists(vs_icon))
+                                    icon_image = (Bitmap)Image.FromFile(vs_icon);
                                 goto default;
                             default:
                                 brush = new SolidBrush(Color.LightGray);
-                                var icon = DrawHelper.TextureMask(image_icon, DrawHelper.Mask_Circle(image_icon.Width, green), green);
                                 
                                 Rectangle rect = new Rectangle((int)(width * marginIcon), i * (size + offY) + top, (int)(width * marginBrush), size);
                                 graphics.FillRectangle(texture_brush, rect);
 
-                                graphics.DrawImage(icon, new PointF(width * marginIcon, i * (size + offY) + top));
+                                graphics.DrawImage(icon_image, new RectangleF(width * marginIcon, i * (size + offY) + top, size, size));
 
                                 if (list[i].index == 0)
                                 {
@@ -110,7 +132,7 @@ namespace CgiBin
                                 {
                                     for (int n = -2; n <= 2; n++)
                                     {
-                                        graphics.DrawString(header, new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold | FontStyle.Underline), border, new PointF(width * marginIcon + m, headerTop));
+                                        graphics.DrawString(header, new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold | FontStyle.Underline), border, new PointF(width * marginIcon + m, headerTop + n));
                                         graphics.DrawString($"{list[i].index + offset}. {list[i].data.username}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), border, new PointF(width * marginText + m, i * (size + offY) + n + top));
                                         graphics.DrawString($"{output}", new Font(FontFamily.Families.First(t => t.Name == "Tahoma"), fontSize, FontStyle.Bold), border, new PointF(width * marginTextNum + m, i * (size + offY) + n + top));
                                     }
@@ -128,6 +150,7 @@ namespace CgiBin
             return file;
         }
     }
+
     public class DrawHelper
     {
         sealed class Error

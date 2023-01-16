@@ -30,7 +30,9 @@ Console.WriteLine($"TCP listening on {port}");
                 { 
                     foreach (string _file in Directory.GetFiles(Raster.Path()))
                     {
-                        if (!_file.Contains("texture.png"))
+                        if (!_file.Contains("texture.png") && 
+                            !_file.Contains("background.png") &&
+                            !_file.Contains("icon"))
                         { 
                             File.Delete(_file);
 Console.WriteLine($"    Deleted: {_file}");
@@ -136,6 +138,9 @@ Console.WriteLine($"Starting to send file over network {info.client.Client.Remot
         private string InputResult(string[] args)
         {
             string rand = string.Empty;
+            Meter meter = Meter.CEP;
+            string file = string.Empty;
+            StatType type = StatType.Monthly;
             for (int i = 1; i < args.Length; i++)
             {
                 switch (args[i - 1])
@@ -148,17 +153,24 @@ Console.WriteLine($"Starting to send file over network {info.client.Client.Remot
                         break;
                 }
             }
-            string file = string.Empty;
-            StatType type = StatType.Monthly;
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "--meter":
+                        meter = Meter.BEP;
+                        break;
+                    case "--weekly":
+                        type = StatType.Weekly;
+                        break;
+                }
+            }
             Stats stats = new Stats();
-            var list = stats.GetStats(false);
+            var list = stats.GetStats(false, meter);
             for (int i = 1; i < args.Length; i++)
             {
                 switch (args[i - 1])
                 {
-                    case "--weekly":
-                        type = StatType.Weekly;
-                        break;
                     case "--player":
                         file = Raster.RasterizeToFile(600, stats.GetStatsPlayer(list, args[i]), $"{_header(type)} character stats", type, rand);
                         stats.Dispose();

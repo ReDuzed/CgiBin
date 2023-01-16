@@ -22,6 +22,7 @@ namespace CgiBin
         private static DataStore db;
         private static readonly string CodeBlock = "```";
         public static long maxStats = 15;
+        public static Meter meter = Meter.CEP;
 
         public Stats(bool writeWeeklyCep = false)
         {
@@ -167,7 +168,7 @@ namespace CgiBin
             }
             return result + CodeBlock;
         }
-        internal IList<Result> GetStats(bool writeWeeklyCep = false)
+        internal IList<Result> GetStats(bool writeWeeklyCep = false, Meter meter = Meter.CEP)
         {
             var _data = GetData();
             IList<Result> result = new List<Result>();
@@ -176,17 +177,19 @@ namespace CgiBin
                 int id = _char.id;
                 string name = _char.name;
                 int cep = _char.cep;
+                int bep = _char.bep;
                 int faction = _char.faction;
                 string header = name + "_" + id;
                 if (!db.BlockExists(header))
                 {
-                    db.NewBlock(new string[] { "id", "name", "faction_id", "bep", "cep", "weekly" }, new string[] 
+                    db.NewBlock(new string[] { "id", "name", "faction_id", "bep", "cep", "weekly_cep", "weekly_bep" }, new string[] 
                     {  
                         id.ToString(),
                         name,
                         faction.ToString(),
-                        _char.bep.ToString(),
+                        bep.ToString(),
                         cep.ToString(),
+                        "0",
                         "0"
                     }, header);
                 }
@@ -197,11 +200,27 @@ namespace CgiBin
                     int weekly = (cep - previous) / 100;
                     int total = cep / 100;
                     if (writeWeeklyCep)
-                    { 
-                        data.WriteValue("cep", cep);
-                        data.WriteValue("weekly", weekly);
+                    {
+                        data.WriteValue("weekly_cep", weekly);
                     }
-                    result.Add(new Result(name, weekly, faction, total));
+                    int.TryParse(data.GetValue("bep"), out previous);
+                    int weekly2 = (bep - previous) / 1000;
+                    int total2 = bep / 1000;
+                    if (writeWeeklyCep)
+                    {
+                        data.WriteValue("weekly_bep", weekly2);
+                        data.WriteValue("bep", bep);
+                        data.WriteValue("cep", cep);
+                    }
+                    switch (meter)
+                    {
+                        case Meter.CEP:
+                            result.Add(new Result(name, weekly, faction, total));
+                            break;
+                        case Meter.BEP:
+                            result.Add(new Result(name, weekly2, faction, total2));
+                            break;
+                    }
                 }
             }
             db.WriteToFile();
@@ -278,5 +297,10 @@ namespace CgiBin
         Weekly,
         Monthly,
         Total
+    }
+    public enum Meter
+    {
+        CEP,
+        BEP
     }
 }
